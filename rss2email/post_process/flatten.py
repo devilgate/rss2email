@@ -1,8 +1,9 @@
-# Copyright (C) 2013-2020 Arun Persaud <apersaud@lbl.gov>
+# Copyright (C) 2013-2021 Arun Persaud <apersaud@lbl.gov>
 #                         Etienne Millon <me@emillon.org>
 #                         Léo Gaspard <leo@gaspard.io>
 #                         Profpatsch <mail@profpatsch.de>
 #                         W. Trevor King <wking@tremily.us>
+#                         Martin McCallion <martin@devilgate.org>
 #
 # This file is part of rss2email.
 #
@@ -27,23 +28,26 @@ from email.mime.multipart import MIMEMultipart
 
 
 def flatten_message(message, **kwargs):
-    """Flatten the message, converting attachments into part of the body.
+    """Flatten the message, converting attachments into body content.
     """
     if message.is_multipart():
         new_message = MIMEMultipart()
         new_message.set_charset(message.get_charset())
-        new_message["Subject"] = message["Subject"]
-        new_message["From"] = message["From"]
-        new_message["To"] = message["To"]
+        new_message['Subject'] = message['Subject']
+        new_message['From'] = message['From']
+        new_message['To'] = message['To']
         new_message['Message-ID'] = message['Message-ID']
         new_message['User-Agent'] = message['User-Agent']
         new_message['List-ID'] = message['List-ID']
         new_message['List-Post'] = message['List-Post']
         new_message['X-RSS-Feed'] = message['X-RSS-Feed']
+        new_message['X-RSS-ID'] = message['X-RSS-ID']
+        new_message['X-RSS-URL'] = message['X-RSS-URL']
+        new_message['X-RSS-TAGS'] = message['X-RSS-TAGS']
 
         payload = ''
         for part in message.walk():
-            if part.get_content_type() in ('text/plain', 'text/html'):
+            if part.get_content_type() in ('text/plain', 'text/html', 'message/rfc822'):
                 payload = payload + '\n\n' + part.get_body()
         new_message.set_payload(payload)
 
