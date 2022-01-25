@@ -53,7 +53,7 @@ import html2text as _html2text
 
 class Config (_configparser.ConfigParser):
     def __init__(self, dict_type=_collections.OrderedDict,
-                 interpolation=_configparser.ExtendedInterpolation(),
+                 interpolation=None,
                  **kwargs):
         super(Config, self).__init__(
             dict_type=dict_type, interpolation=interpolation, **kwargs)
@@ -156,6 +156,10 @@ CONFIG['DEFAULT'] = _collections.OrderedDict((
         # digest message before it is mailed.
         # Example: digest-post-process = 'rss2email.post_process.downcase downcase_message'
         ('digest-post-process', ''),
+        # The format for the Subject line.  Available attributes are
+        # 'feed', 'feed-name', 'feed-url', 'feed-title'.
+        ('subject-format', '{feed-title}'),
+
         ## HTML conversion
         # True: Send text/html messages when possible.
         # False: Convert HTML to plain text.
@@ -195,10 +199,10 @@ CONFIG['DEFAULT'] = _collections.OrderedDict((
                 '  padding: 5px;\n'
                 '  margin-bottom: 0px;\n'
                 '}\n'
-                '#entry {\n'
+                '.entry {\n'
                 '  border: solid 4px #c3d9ff;\n'
                 '}\n'
-                '#body {\n'
+                '.body {\n'
                 '  margin-left: 5px;\n'
                 '  margin-right: 5px;\n'
                 '}\n')),

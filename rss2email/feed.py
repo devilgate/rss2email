@@ -509,7 +509,7 @@ class Feed (object):
         new_state['hash'] = new_hash
 
         sender = self._get_entry_email(parsed=parsed, entry=entry)
-        subject = self._get_entry_title(entry)
+        subject = self._get_entry_subject(entry=entry)
 
         message_id = '<{0}@{1}>'.format(_uuid.uuid4(), platform.node())
         in_reply_to = old_state.get('message_id') if old_state is not None else None
@@ -668,6 +668,17 @@ class Feed (object):
         if 'name' in feed.get('publisher_detail', []):
             data['publisher'] = feed.publisher_detail.name
         name = self.name_format.format(**data)
+        name = name.replace('\n', ' ').strip()
+        return _html.unescape(name)
+
+    def _get_entry_subject(self, entry):
+        data = {
+            'feed': self,
+            'feed-name': self.name,
+            'feed-url': self.url,
+            'feed-title': self._get_entry_title(entry),
+            }
+        name = self.subject_format.format(**data)
         return _html.unescape(name)
 
     def _validate_email(self, email, default=None):
@@ -813,14 +824,19 @@ class Feed (object):
                         _saxutils.escape(self.css),
                         '    </style>',
                         ])
+            # For backward compatibility, specify "body" and "entry"
+            # as both class and id.  Unlike the other elements
+            # (header, footer) they were used as ids, not classes,
+            # which was inconsistent as well as problemmatic
+            # in the config file (# is a comment character).
             lines.extend([
                     '</head>',
                     '<body dir="auto">',
-                    '<div id="entry">',
+                    '<div class="entry" id="entry">',
                     '<h1 class="header"><a href="{}">{}</a></h1>'.format(
                         _saxutils.escape(link) if link else '',
                         _saxutils.escape(subject)),
-                    '<div id="body">',
+                    '<div class="body" id="body">',
                     ])
             if content['type'] in ('text/html', 'application/xhtml+xml'):
                 lines.append(content['value'].strip())
